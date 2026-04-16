@@ -1,0 +1,61 @@
+.option-group {
+  background: var(--bg-card);
+  border: 1px solid var(--border-primary);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+}
+
+.option-group-title {
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: var(--space-md) var(--space-lg) var(--space-sm);
+}
+
+.option-group-content {
+  padding: 0 var(--space-lg) var(--space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+}
+
+.option-row {
+  display: grid;
+  grid-template-columns: 140px 1fr;
+  align-items: center;
+  gap: var(--space-md);
+}
+
+.option-label-wrap {
+  display: flex;
+  flex-direction: column;
+}
+
+.option-label-wrap .label {
+  margin-bottom: 0;
+}
+
+.option-hint {
+  font-size: 0.6875rem;
+  color: var(--text-tertiary);
+  margin-top: 2px;
+}
+
+.option-control {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+}
+
+.option-control .select,
+.option-control .input {
+  flex: 1;
+}
+
+@media (max-width: 640px) {
+  .option-row {
+    grid-template-columns: 1fr;
+  }
+}

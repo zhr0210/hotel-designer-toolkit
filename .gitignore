@@ -1,0 +1,10 @@
+node_modules/
+client/node_modules/
+server/node_modules/
+dist/
+client/dist/
+release/
+uploads/
+server/logs/
+.DS_Store
+*.log

@@ -1,0 +1,69 @@
+.progress-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+}
+
+.progress-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.progress-label {
+  font-size: 0.8125rem;
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+
+.progress-percent {
+  font-size: 0.8125rem;
+  font-family: var(--font-mono);
+  color: var(--accent-2);
+  font-weight: 600;
+}
+
+.progress-track {
+  width: 100%;
+  height: 6px;
+  background: var(--bg-input);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--accent-gradient);
+  border-radius: var(--radius-full);
+  transition: width 0.3s ease;
+  position: relative;
+}
+
+.progress-fill.striped::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    -45deg,
+    transparent,
+    transparent 8px,
+    rgba(255, 255, 255, 0.1) 8px,
+    rgba(255, 255, 255, 0.1) 16px
+  );
+  animation: progressStripe 0.8s linear infinite;
+}
+
+/* Status-specific */
+.progress-wrapper.done .progress-fill {
+  background: var(--success);
+}
+.progress-wrapper.done .progress-percent {
+  color: var(--success);
+}
+
+.progress-wrapper.error .progress-fill {
+  background: var(--error);
+}
+.progress-wrapper.error .progress-percent {
+  color: var(--error);
+}
