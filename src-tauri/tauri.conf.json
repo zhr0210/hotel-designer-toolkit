@@ -33,9 +33,7 @@
     "targets": "all",
     "externalBin": [
       "bin/ffmpeg",
-      "bin/ffprobe",
-      "bin/ffmpeg-universal-apple-darwin",
-      "bin/ffprobe-universal-apple-darwin"
+      "bin/ffprobe"
     ]
   },
   "plugins": {
