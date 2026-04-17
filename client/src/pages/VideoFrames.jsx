@@ -13,10 +13,10 @@ export default function VideoFrames() {
   const [metadata, setMetadata] = useState(null);
   const [mode, setMode] = useState('frames'); // frames | gif
   const [options, setOptions] = useState({
-    fps: '24',
+    fps: '15',
     format: 'png',
     quality: '90',
-    width: '',
+    width: '480',
     startTime: '',
     duration: '',
     colors: '256',

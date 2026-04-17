@@ -1,13 +1,14 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useState, useEffect } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Upload, FileVideo, FileImage, X, AlertCircle } from 'lucide-react';
+import { getCurrentWebviewWindow } from '@tauri-apps/api/webviewWindow';
+import { open } from '@tauri-apps/plugin-dialog';
 import './FileUploader.css';
 
 export default function FileUploader({
   accept,
   multiple = false,
   maxFiles = 1,
-  maxSize = 500 * 1024 * 1024,
   onFiles,
   label = '拖拽文件到这里，或点击选择',
   hint = '',
@@ -16,31 +17,89 @@ export default function FileUploader({
 }) {
   const [error, setError] = useState(null);
 
-  const onDrop = useCallback((acceptedFiles, rejectedFiles) => {
-    setError(null);
-    if (rejectedFiles.length > 0) {
-      const err = rejectedFiles[0].errors[0];
-      if (err.code === 'file-too-large') {
-        setError('文件过大，最大支持 500MB');
-      } else if (err.code === 'file-invalid-type') {
-        setError('不支持的文件格式');
-      } else {
-        setError(err.message);
-      }
-      return;
-    }
-    if (onFiles) onFiles(acceptedFiles);
-  }, [onFiles]);
+  // Handle Tauri Native Drag and Drop
+  useEffect(() => {
+    let unlistenFn = null;
+    let cancelled = false;
 
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept,
-    multiple,
-    maxFiles,
-    maxSize,
+    async function setupListener() {
+      try {
+        const window = getCurrentWebviewWindow();
+        const unlisten = await window.onDragDropEvent((event) => {
+          if (event.payload.type === 'drop') {
+            const paths = event.payload.paths;
+            if (paths && paths.length > 0) {
+              const tauriFiles = paths.slice(0, multiple ? paths.length : maxFiles).map(path => {
+                const name = path.split(/[/\\]/).pop();
+                return {
+                  name,
+                  path,
+                  size: 0,
+                  type: name.toLowerCase().endsWith('.mp4') || name.toLowerCase().endsWith('.mov') ? 'video/mp4' : 'image/jpeg',
+                  lastModified: Date.now(),
+                  webkitRelativePath: ""
+                };
+              });
+              if (onFiles) onFiles(tauriFiles);
+            }
+          }
+        });
+        
+        if (cancelled) {
+          unlisten();
+        } else {
+          unlistenFn = unlisten;
+        }
+      } catch (err) {
+        console.error('Failed to setup drag-drop listener:', err);
+      }
+    }
+
+    setupListener();
+    return () => {
+      cancelled = true;
+      if (unlistenFn) unlistenFn();
+    };
+  }, [onFiles, multiple, maxFiles]);
+
+  const handleManualClick = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    try {
+      const selected = await open({
+        multiple,
+        filters: accept ? Object.entries(accept).map(([title, exts]) => ({
+          name: title,
+          extensions: exts.map(e => e.replace('.', ''))
+        })) : []
+      });
+
+      if (selected) {
+        const paths = Array.isArray(selected) ? selected : [selected];
+        const tauriFiles = paths.map(path => {
+          const name = path.split(/[/\\]/).pop();
+          return {
+            name,
+            path,
+            size: 0,
+            type: name.toLowerCase().endsWith('.mp4') || name.toLowerCase().endsWith('.mov') ? 'video/mp4' : 'image/jpeg'
+          };
+        });
+        if (onFiles) onFiles(tauriFiles);
+      }
+    } catch (err) {
+      setError('打开对话框失败: ' + err.message);
+    }
+  };
+
+  // We keep react-dropzone just for the UI state/styling, but we'll override its behavior
+  const { getRootProps, isDragActive } = useDropzone({
+    noClick: true, // we handle click manually for Tauri Dialog
+    noKeyboard: true,
   });
 
   function formatSize(bytes) {
+    if (bytes === 0) return '---'; 
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
@@ -55,9 +114,9 @@ export default function FileUploader({
     <div className="file-uploader-wrapper">
       <div
         {...getRootProps()}
+        onClick={handleManualClick}
         className={`file-dropzone ${isDragActive ? 'dragging' : ''} ${files.length > 0 ? 'has-files' : ''}`}
       >
-        <input {...getInputProps()} />
         <div className="dropzone-content">
           <div className={`dropzone-icon ${isDragActive ? 'bounce' : ''}`}>
             <Upload size={28} />

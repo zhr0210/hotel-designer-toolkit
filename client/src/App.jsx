@@ -6,6 +6,7 @@ import VideoFrames from './pages/VideoFrames';
 import ImageConvert from './pages/ImageConvert';
 import ImageStitch from './pages/ImageStitch';
 import ImageSplit from './pages/ImageSplit';
+import Diagnostics from './pages/Diagnostics';
 import './index.css';
 
 function App() {
@@ -19,6 +20,7 @@ function App() {
           <Route path="/image/convert" element={<ImageConvert />} />
           <Route path="/image/stitch" element={<ImageStitch />} />
           <Route path="/image/split" element={<ImageSplit />} />
+          <Route path="/diagnostics" element={<Diagnostics />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Route>
       </Routes>

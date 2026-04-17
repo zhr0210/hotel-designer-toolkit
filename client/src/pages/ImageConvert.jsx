@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useCallback } from 'react';
 import { Palette, Play, Loader } from 'lucide-react';
 import ToolHeader from '../components/ToolHeader';
 import FileUploader from '../components/FileUploader';
@@ -21,11 +21,23 @@ export default function ImageConvert() {
   const [result, setResult] = useState(null);
   const [error, setError] = useState(null);
 
-  function updateOption(key, value) {
+  const updateOption = (key, value) => {
     setOptions(prev => ({ ...prev, [key]: value }));
-  }
+  };
 
-  async function handleSubmit() {
+  const handleReset = useCallback(() => {
+    setFiles([]);
+    setStatus('idle');
+    setResult(null);
+    setError(null);
+  }, []);
+
+  const handleFiles = useCallback((f) => {
+    handleReset();
+    setFiles(f);
+  }, [handleReset]);
+
+  const handleSubmit = async () => {
     if (files.length === 0) return;
     setStatus('processing');
     setResult(null);
@@ -40,14 +52,7 @@ export default function ImageConvert() {
       setStatus('error');
       setError(err.message);
     }
-  }
-
-  function handleReset() {
-    setFiles([]);
-    setStatus('idle');
-    setResult(null);
-    setError(null);
-  }
+  };
 
   const isProcessing = status === 'processing';
 
@@ -64,9 +69,9 @@ export default function ImageConvert() {
         <div className="tool-main">
           <FileUploader
             accept={{ 'image/*': ['.jpg', '.jpeg', '.png', '.webp', '.avif', '.tiff', '.bmp', '.gif', '.heic', '.heif'] }}
-            onFiles={(f) => { handleReset(); setFiles(f); }}
+            onFiles={handleFiles}
             files={files}
-            onRemove={() => handleReset()}
+            onRemove={handleReset}
             label="拖拽图片文件到这里"
             hint="支持 JPEG, PNG, WebP, AVIF, TIFF, BMP, HEIC 格式"
           />

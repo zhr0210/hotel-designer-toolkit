@@ -53,3 +53,34 @@
   gap: var(--space-md);
   flex-wrap: wrap;
 }
+
+/* Directory Preview Styles */
+.dir-preview {
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-xl);
+  text-align: center;
+}
+
+.dir-icon-container {
+  width: 80px;
+  height: 80px;
+  background: rgba(52, 211, 153, 0.1);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: var(--space-md);
+}
+
+.dir-text {
+  font-weight: 600;
+  margin-bottom: var(--space-xs);
+}
+
+.dir-path {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  word-break: break-all;
+  max-width: 80%;
+}

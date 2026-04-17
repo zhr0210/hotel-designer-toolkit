@@ -46,14 +46,12 @@ export default function ImageSplit() {
       if (!res.success) throw new Error(res.error || 'Split failed');
       
       setStatus('done');
-      // For split result, we might want to show the folder or the first image
-      // Let's assume ResultPanel can handle a list of images or we show the count
+      // Treat as directory result
       setResult({
-        ...res.data,
-        // Mock a single URL for preview if needed, or update ResultPanel
-        url: res.data.images[0]?.url,
-        filename: res.data.images[0]?.filename,
-        displayCount: res.data.count
+        url: res.data.dir,
+        isDir: true,
+        filename: `split-${files[0].name || 'images'}`,
+        count: res.data.count
       });
     } catch (err) {
       setStatus('error');

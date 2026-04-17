@@ -1,87 +1,92 @@
-import axios from 'axios';
+import { invoke, convertFileSrc } from '@tauri-apps/api/core';
 
-const api = axios.create({
-  baseURL: '/api',
-  timeout: 600000, // 10min for large files
-});
+// Helper to extract absolute path from File or string
+async function getFilePath(file) {
+  if (typeof file === 'string') return file;
+  if (file && file.path) return file.path;
+  // If no path is available (e.g. strict web context), we'd need to use Tauri Plugin Dialog.
+  // For the sake of dropzone in Tauri, file.path is injected.
+  throw new Error("Unable to retrieve file path safely. Please try selecting the file via the button instead of dragging if this fails continually.");
+}
 
 // --- Video APIs ---
 
 export async function probeVideo(file) {
-  const formData = new FormData();
-  formData.append('video', file);
-  const res = await api.post('/video/probe', formData);
-  return res.data;
+  const filePath = await getFilePath(file);
+  const data = await invoke('probe_video', { filePath });
+  return { success: true, data, filename: file.name || file };
 }
 
 export async function transcodeVideo(file, options, onUploadProgress) {
-  const formData = new FormData();
-  formData.append('video', file);
-  formData.append('options', JSON.stringify(options));
-  const res = await api.post('/video/transcode', formData, { onUploadProgress });
-  return res.data;
+  // onUploadProgress is not native to invoke, but we can listen to events. 
+  // We'll keep the signature and implement event listening later.
+  const filePath = await getFilePath(file);
+  const taskId = await invoke('transcode_video', { filePath, options });
+  return { success: true, taskId };
 }
 
 export async function extractFrames(file, options, onUploadProgress) {
-  const formData = new FormData();
-  formData.append('video', file);
-  formData.append('options', JSON.stringify(options));
-  const res = await api.post('/video/extract-frames', formData, { onUploadProgress });
-  return res.data;
+  const filePath = await getFilePath(file);
+  const taskId = await invoke('extract_frames', { filePath, options });
+  return { success: true, taskId };
 }
 
 export async function videoToGif(file, options, onUploadProgress) {
-  const formData = new FormData();
-  formData.append('video', file);
-  formData.append('options', JSON.stringify(options));
-  const res = await api.post('/video/to-gif', formData, { onUploadProgress });
-  return res.data;
+  const filePath = await getFilePath(file);
+  const taskId = await invoke('video_to_gif', { filePath, options });
+  return { success: true, taskId };
 }
 
 export async function getTaskProgress(taskId) {
-  const res = await api.get(`/progress/${taskId}`);
-  return res.data;
+  const data = await invoke('get_task_progress', { taskId });
+  return data;
+}
+
+export async function openFolder(path) {
+  await invoke('open_folder', { path });
+}
+
+export async function saveFile(sourcePath, filename) {
+  await invoke('save_file', { sourcePath, filename });
 }
 
 // --- Image APIs ---
 
 export async function getImageMetadata(file) {
-  const formData = new FormData();
-  formData.append('image', file);
-  const res = await api.post('/image/metadata', formData);
-  return res.data;
+  const filePath = await getFilePath(file);
+  const data = await invoke('get_image_metadata', { filePath });
+  return { success: true, data, filename: file.name || file };
 }
 
 export async function convertImage(file, options) {
-  const formData = new FormData();
-  formData.append('image', file);
-  formData.append('options', JSON.stringify(options));
-  const res = await api.post('/image/convert', formData);
-  return res.data;
+  const filePath = await getFilePath(file);
+  const data = await invoke('convert_image', { filePath, options });
+  return { success: true, data };
 }
 
 export async function stitchImages(files, options) {
-  const formData = new FormData();
-  files.forEach((file) => formData.append('images', file));
-  Object.entries(options).forEach(([key, val]) => {
-    formData.append(key, val);
-  });
-  const res = await api.post('/image/stitch', formData);
-  return res.data;
+  const filePaths = await Promise.all(Array.from(files).map(f => getFilePath(f)));
+  const data = await invoke('stitch_images', { filePaths, options });
+  return { success: true, data };
 }
 
 export async function splitImage(file, options) {
-  const formData = new FormData();
-  formData.append('image', file);
-  Object.entries(options).forEach(([key, val]) => {
-    formData.append(key, val);
-  });
-  const res = await api.post('/image/split', formData);
-  return res.data;
+  const filePath = await getFilePath(file);
+  const data = await invoke('split_image', { filePath, options });
+  return { success: true, data };
 }
 
-export function getDownloadUrl(filename) {
-  return `/api/download/${filename}`;
+export async function runDiagnostics() {
+  const data = await invoke('run_diagnostics');
+  return { success: true, data };
 }
 
-export default api;
+export function getDownloadUrl(path) {
+  if (!path) return '';
+  return convertFileSrc(path);
+}
+
+export default {
+  probeVideo, transcodeVideo, extractFrames, videoToGif, getTaskProgress, openFolder, saveFile,
+  getImageMetadata, convertImage, stitchImages, splitImage, getDownloadUrl, runDiagnostics
+};

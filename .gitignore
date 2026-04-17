@@ -8,3 +8,10 @@ uploads/
 server/logs/
 .DS_Store
 *.log
+src-tauri/target/
+src-tauri/gen/
+Hotel Designer Toolkit.app/
+酒店牛马美工专用.app/
+*.dmg
+*.msi
+*.exe

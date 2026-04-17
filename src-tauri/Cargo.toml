@@ -1,0 +1,25 @@
+[package]
+name = "hotel-designer-toolkit"
+version = "1.0.0"
+description = "A Tauri App"
+authors = ["you"]
+edition = "2021"
+
+[build-dependencies]
+tauri-build = { version = "2.0.0", features = [] }
+
+[dependencies]
+tauri = { version = "2.0.0", features = ["protocol-asset"] }
+tauri-plugin-shell = "2.0.0"
+tauri-plugin-dialog = "2.0.0"
+tauri-plugin-fs = "2.0.0"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+image = "0.25.1"
+uuid = { version = "1.8", features = ["v4", "fast-rng", "macro-diagnostics"] }
+tokio = { version = "1.37.0", features = ["fs", "io-util", "process", "rt", "rt-multi-thread"] }
+chrono = { version = "0.4", features = ["serde"] }
+
+[features]
+default = [ "custom-protocol" ]
+custom-protocol = [ "tauri/custom-protocol" ]

@@ -1,5 +1,5 @@
 import { NavLink, useLocation } from 'react-router-dom';
-import { Film, Layers, ImageIcon, PanelLeftClose, Zap, Scissors, Palette, LayoutGrid } from 'lucide-react';
+import { Film, Layers, ImageIcon, PanelLeftClose, Zap, Scissors, Palette, LayoutGrid, Activity } from 'lucide-react';
 import './Sidebar.css';
 
 const navItems = [
@@ -73,10 +73,11 @@ export default function Sidebar() {
       </nav>
 
       <div className="sidebar-footer">
-        <div className="sidebar-stats">
+        <NavLink to="/diagnostics" className={({ isActive }) => `sidebar-stats ${isActive ? 'active' : ''}`}>
           <span className="stats-dot" />
-          <span className="stats-text">FFmpeg · Sharp 就绪</span>
-        </div>
+          <span className="stats-text">服务状态 · 环境自检</span>
+          <Activity size={14} className="stats-chevron" />
+        </NavLink>
       </div>
     </aside>
   );
