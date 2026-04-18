@@ -29,14 +29,20 @@ jobs:
       - name: Export LFS binaries
         run: git lfs pull
 
-      - name: Set permissions
-        if: matrix.platform != 'windows-latest'
+      - name: Inspect sidecars (Windows)
+        if: matrix.platform == 'windows-latest'
+        run: |
+          ls -l src-tauri/bin/
+          ls -lh src-tauri/bin/
+
+      - name: Set permissions (macOS)
+        if: matrix.platform == 'macos-latest'
         run: chmod +x src-tauri/bin/*
 
       - name: Rust setup
         uses: dtolnay/rust-toolchain@stable
         with:
-          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || '' }}
+          targets: ${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || 'x86_64-pc-windows-msvc' }}
 
       - name: Rust cache
         uses: swatinem/rust-cache@v2
