@@ -29,11 +29,6 @@ jobs:
       - name: Export LFS binaries
         run: git lfs pull
 
-      - name: Inspect sidecars (Windows)
-        if: matrix.platform == 'windows-latest'
-        run: |
-          ls -l src-tauri/bin/
-          ls -lh src-tauri/bin/
 
       - name: Set permissions (macOS)
         if: matrix.platform == 'macos-latest'
