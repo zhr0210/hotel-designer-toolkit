@@ -30,7 +30,7 @@
   },
   "bundle": {
     "active": true,
-    "targets": "all",
+    "targets": ["nsis", "dmg"],
     "externalBin": [
       "bin/ffmpeg",
       "bin/ffprobe"
